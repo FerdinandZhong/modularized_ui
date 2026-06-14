@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { WorkflowConfig } from '@/lib/types';
 import { createApiClient } from '@/lib/api';
+import { useChatStore } from './chatStore';
 
 interface WorkflowState {
   workflowUrl: string;
@@ -31,6 +32,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   sessionDirectory: null,
 
   connect: async (url: string, apiKey: string) => {
+    useChatStore.getState().clearMessages();
     set({ isConnecting: true, connectError: null });
 
     try {

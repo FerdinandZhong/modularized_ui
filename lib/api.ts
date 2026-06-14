@@ -42,6 +42,28 @@ async function proxyFetch<T>(
   return res.json() as Promise<T>;
 }
 
+async function proxyFetchMultipart<T>(
+  path: string,
+  config: ApiClientConfig,
+  formData: FormData,
+): Promise<T> {
+  const res = await fetch(`/api/proxy/${path}`, {
+    method: 'POST',
+    headers: {
+      'X-Workflow-URL': config.workflowUrl,
+      'X-API-Key': config.apiKey,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new ApiError(res.status, text);
+  }
+
+  return res.json() as Promise<T>;
+}
+
 export function createApiClient(config: ApiClientConfig) {
   return {
     fetchWorkflow(): Promise<WorkflowConfig> {
@@ -66,25 +88,14 @@ export function createApiClient(config: ApiClientConfig) {
       });
     },
 
-    uploadFile(
-      sessionId: string,
-      sessionDirectory: string,
-      fileName: string,
-      base64Chunk: string,
-      chunkIndex: number,
-      totalChunks: number,
-    ): Promise<FileUploadResponse> {
-      return proxyFetch('api/workflow/upload', config, {
-        method: 'POST',
-        body: JSON.stringify({
-          session_id: sessionId,
-          session_directory: sessionDirectory,
-          file_name: fileName,
-          chunk: base64Chunk,
-          chunk_index: chunkIndex,
-          total_chunks: totalChunks,
-        }),
-      });
+    uploadFile(sessionId: string, file: File): Promise<FileUploadResponse> {
+      const formData = new FormData();
+      formData.append('file', file);
+      return proxyFetchMultipart(
+        `api/file/upload?session_id=${encodeURIComponent(sessionId)}`,
+        config,
+        formData,
+      );
     },
   };
 }

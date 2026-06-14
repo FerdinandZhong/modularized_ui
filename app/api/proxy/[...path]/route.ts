@@ -44,8 +44,14 @@ async function proxyRequest(
 
   const forwardHeaders: Record<string, string> = {
     Authorization: `Bearer ${apiKey}`,
-    'Content-Type': req.headers.get('Content-Type') || 'application/json',
   };
+
+  const contentType = req.headers.get('Content-Type');
+  if (contentType) {
+    forwardHeaders['Content-Type'] = contentType;
+  } else if (method !== 'GET' && method !== 'HEAD') {
+    forwardHeaders['Content-Type'] = 'application/json';
+  }
 
   const init: RequestInit = {
     method,
@@ -53,7 +59,7 @@ async function proxyRequest(
   };
 
   if (method !== 'GET' && method !== 'HEAD') {
-    init.body = await req.text();
+    init.body = await req.arrayBuffer();
   }
 
   try {

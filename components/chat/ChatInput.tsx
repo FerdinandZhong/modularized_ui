@@ -22,7 +22,7 @@ export function ChatInput({
   disabled = false,
   placeholder = 'Message…',
 }: ChatInputProps) {
-  const { workflowUrl, apiKey, sessionId, sessionDirectory } = useWorkflowStore();
+  const { workflowUrl, apiKey, sessionId } = useWorkflowStore();
 
   const [value, setValue] = useState('');
   const [attachment, setAttachment] = useState<AttachmentState | null>(null);
@@ -62,7 +62,7 @@ export function ChatInput({
     if (!file) return;
 
     // Demo mode: no session available — just attach name without uploading
-    if (!sessionId || !sessionDirectory) {
+    if (!sessionId) {
       setAttachment({ name: file.name, path: `[demo]/${file.name}` });
       e.target.value = '';
       return;
@@ -72,7 +72,7 @@ export function ChatInput({
     setUploadError(null);
     try {
       const client = createApiClient({ workflowUrl, apiKey });
-      const filePath = await uploadFile(file, sessionId, sessionDirectory, client);
+      const filePath = await uploadFile(file, sessionId, client);
       setAttachment({ name: file.name, path: filePath });
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');

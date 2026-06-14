@@ -15,7 +15,7 @@ interface FileUploadInputProps {
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 export function FileUploadInput({ name, label, onChange }: FileUploadInputProps) {
-  const { workflowUrl, apiKey, sessionId, sessionDirectory } = useWorkflowStore();
+  const { workflowUrl, apiKey, sessionId } = useWorkflowStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -26,7 +26,7 @@ export function FileUploadInput({ name, label, onChange }: FileUploadInputProps)
 
   const processFile = useCallback(
     async (file: File) => {
-      if (!sessionId || !sessionDirectory) {
+      if (!sessionId) {
         setStatus('error');
         setErrorMsg('No active session. Please reconnect.');
         return;
@@ -39,7 +39,7 @@ export function FileUploadInput({ name, label, onChange }: FileUploadInputProps)
 
       try {
         const client = createApiClient({ workflowUrl, apiKey });
-        const filePath = await uploadFile(file, sessionId, sessionDirectory, client, (p) => {
+        const filePath = await uploadFile(file, sessionId, client, (p) => {
           setProgress(p.progress);
         });
         onChange(name, filePath);
@@ -49,7 +49,7 @@ export function FileUploadInput({ name, label, onChange }: FileUploadInputProps)
         setStatus('error');
       }
     },
-    [workflowUrl, apiKey, sessionId, sessionDirectory, name, onChange],
+    [workflowUrl, apiKey, sessionId, name, onChange],
   );
 
   const handleDrop = useCallback(
