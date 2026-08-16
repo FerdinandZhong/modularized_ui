@@ -5,10 +5,11 @@
 #
 # Sequence:
 #   1. git_sync          – pull latest code from GitHub into the CML project
-#   2. setup_environment – install Node.js, npm ci, npm run build, compile nginx
+#   2. setup_environment – install Node.js, npm ci, npm run build
 #
 # After both jobs succeed the GitHub Actions workflow restarts the CML Application
-# (cai/launch_app.py), which starts the Next.js standalone server + nginx.
+# (cai/launch_app.py), which starts the Next.js standalone server directly on
+# CDSW_APP_PORT (single service, no reverse proxy needed).
 
 jobs:
   git_sync:

@@ -5,6 +5,7 @@ import {
   KickoffResponse,
   EventsResponse,
   FileUploadResponse,
+  GraphResponse,
 } from './types';
 
 interface ApiClientConfig {
@@ -83,6 +84,13 @@ export function createApiClient(config: ApiClientConfig) {
 
     getEvents(traceId: string): Promise<EventsResponse> {
       return proxyFetch(`api/workflow/events?trace_id=${encodeURIComponent(traceId)}`, config, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+
+    getGraph(traceId: string): Promise<GraphResponse> {
+      return proxyFetch(`api/workflow/graph?trace_id=${encodeURIComponent(traceId)}`, config, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });

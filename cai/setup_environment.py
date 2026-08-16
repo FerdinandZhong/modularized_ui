@@ -6,7 +6,6 @@ Steps:
   2. npm ci (install all deps including devDependencies needed for build)
   3. npm run build (produces .next/standalone/)
   4. Copy static assets into standalone dir
-  5. Download and compile nginx into ~/.local/bin/nginx (no root required)
 """
 import os
 import sys
@@ -129,6 +128,10 @@ def build_nextjs():
         shutil.copytree(public_src, public_dst)
 
     print("Standalone build ready.", flush=True)
+
+
+# NOTE: no reverse proxy is installed — this is a single Next.js service and
+# launch_app.sh binds node directly to CDSW_APP_PORT.
 
 
 # ── main ──────────────────────────────────────────────────────────────────────

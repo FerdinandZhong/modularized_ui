@@ -129,3 +129,34 @@ export interface ApiError {
   message: string;
   status: number;
 }
+
+// Workflow graph (DAG panel)
+export type NodeStatus = 'pending' | 'running' | 'completed' | 'abstained' | 'error';
+
+export interface GraphNode {
+  id: string;
+  label: string;
+  guardrail?: string | null;
+  status?: NodeStatus;
+  verdict?: string | null;
+  confidence?: number | null;
+  attempts?: number | null;
+  error?: string | null;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+}
+
+export interface GraphResponse {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  decisions: Array<{
+    decision_id: string;
+    step: string;
+    scenario: string;
+    outcome: string;
+    confidence: number;
+  }>;
+}

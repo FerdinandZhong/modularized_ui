@@ -9,6 +9,7 @@ import { ChatView } from '@/components/chat/ChatView';
 import { EventTimeline } from '@/components/events/EventTimeline';
 import { AgentThinking } from '@/components/events/AgentThinking';
 import { WorkflowOutput } from '@/components/output/WorkflowOutput';
+import { WorkflowGraph } from '@/components/workflow/WorkflowGraph';
 import { useWorkflowStore, getTaskInputNames } from '@/stores/workflowStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useChatStore } from '@/stores/chatStore';
@@ -42,7 +43,7 @@ function makeDemoEvents(now: string): WorkflowEvent[] {
 
 export function WorkflowShell() {
   const { workflowData, workflowUrl, apiKey, inputs, sessionId, resetInputs } = useWorkflowStore();
-  const { events, isRunning, crewOutput, startExecution, addEvents, stopExecution, reset: resetEvents } = useEventStore();
+  const { traceId, events, isRunning, crewOutput, startExecution, addEvents, stopExecution, reset: resetEvents } = useEventStore();
   const { messages, addMessage, clearMessages } = useChatStore();
 
   const [showReasoning, setShowReasoning] = useState(false);
@@ -297,6 +298,15 @@ export function WorkflowShell() {
 
       {/* ── Right panel ── */}
       <div className="flex flex-1 flex-col bg-surface-dark-5 overflow-hidden">
+        {/* DAG graph — shown whenever a run is active or complete */}
+        {traceId && !isDemoMode && (
+          <WorkflowGraph
+            traceId={traceId}
+            workflowUrl={workflowUrl}
+            apiKey={apiKey}
+            isRunning={isRunning}
+          />
+        )}
         {crewOutput ? (() => {
           const thinkingCount = events.filter(e => e.type === 'llm_call_completed' && e.response).length;
           return (

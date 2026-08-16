@@ -45,3 +45,10 @@ cai/nginx
 cai/*.pid
 nginx_error.log
 nginx.pid
+
+# Claude Code local config
+.claude/
+
+# Python cache
+__pycache__/
+*.pyc
