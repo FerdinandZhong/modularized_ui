@@ -298,15 +298,9 @@ export function WorkflowShell() {
 
       {/* ── Right panel ── */}
       <div className="flex flex-1 flex-col bg-surface-dark-5 overflow-hidden">
-        {/* DAG graph — shown whenever a run is active or complete */}
-        {traceId && !isDemoMode && (
-          <WorkflowGraph
-            traceId={traceId}
-            workflowUrl={workflowUrl}
-            apiKey={apiKey}
-            isRunning={isRunning}
-          />
-        )}
+        {/* DAG graph — derived client-side from the workflow config + event stream
+            (no backend graph endpoint needed). Shown once a run has produced events. */}
+        {!isDemoMode && (events.length > 0 || isRunning) && <WorkflowGraph />}
         {crewOutput ? (() => {
           const thinkingCount = events.filter(e => e.type === 'llm_call_completed' && e.response).length;
           return (
