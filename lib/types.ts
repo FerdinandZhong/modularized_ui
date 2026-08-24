@@ -100,6 +100,8 @@ export type WorkflowEventType =
   | 'llm_call_started'
   | 'llm_call_completed'
   | 'llm_call_failed'
+  | 'mcp_initialization_started'
+  | 'mcp_initialization_completed'
   | 'crew_kickoff_completed'
   | 'crew_kickoff_failed';
 
@@ -132,3 +134,23 @@ export interface ApiError {
 
 // Workflow graph (DAG panel) — node status; graph is derived client-side in lib/workflowGraph.ts
 export type NodeStatus = 'pending' | 'running' | 'completed' | 'abstained' | 'error';
+
+// NL→Dashboard analytics (Demo 1: NL-to-SQL). The workflow's reporter agent returns this JSON.
+export type ChartHint = 'bar' | 'line' | 'pie' | 'table';
+
+export interface AnalyticsResult {
+  question: string;
+  sql?: string;
+  columns: string[];
+  rows: (string | number | null)[][];
+  chart_hint?: ChartHint;
+  summary?: string;
+}
+
+export interface AnalyticsPanel {
+  id: string;
+  question: string;
+  status: 'running' | 'done' | 'blocked' | 'error';
+  result?: AnalyticsResult;
+  message?: string;   // error text or block reason
+}

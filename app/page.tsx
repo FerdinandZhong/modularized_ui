@@ -18,12 +18,20 @@ export default function Home() {
           <span className="text-micro font-medium tracking-wider uppercase text-white/80">
             Agent Workflow
           </span>
-          <button
-            onClick={() => router.push('/workflow')}
-            className="text-micro text-apple-bright-blue hover:text-white transition-colors cursor-pointer"
-          >
-            Try Demo
-          </button>
+          <div className="flex items-center gap-5">
+            <button
+              onClick={() => router.push('/analytics')}
+              className="text-micro text-white/70 hover:text-white transition-colors cursor-pointer"
+            >
+              Analytics
+            </button>
+            <button
+              onClick={() => router.push('/workflow')}
+              className="text-micro text-apple-bright-blue hover:text-white transition-colors cursor-pointer"
+            >
+              Try Demo
+            </button>
+          </div>
         </div>
       </GlassNav>
 

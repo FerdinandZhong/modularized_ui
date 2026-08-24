@@ -22,6 +22,8 @@ export const EVENT_LABELS: Record<WorkflowEventType, string> = {
   llm_call_started: 'Calling LLM',
   llm_call_completed: 'LLM responded',
   llm_call_failed: 'LLM failed',
+  mcp_initialization_started: 'Initializing MCP',
+  mcp_initialization_completed: 'MCP ready',
   crew_kickoff_completed: 'Workflow complete',
   crew_kickoff_failed: 'Workflow failed',
 };
@@ -41,6 +43,8 @@ export const EVENT_CATEGORIES: Record<WorkflowEventType, EventCategory> = {
   llm_call_started: 'llm',
   llm_call_completed: 'llm',
   llm_call_failed: 'llm',
+  mcp_initialization_started: 'tool',
+  mcp_initialization_completed: 'tool',
   crew_kickoff_completed: 'terminal',
   crew_kickoff_failed: 'terminal',
 };
