@@ -45,10 +45,28 @@ export function extractResultJson(text: string): AnalyticsResult | null {
   return null;
 }
 
-/** The final crew output text from the event stream. */
-export function finalOutputText(events: WorkflowEvent[]): string {
-  const done = [...events].reverse().find((e) => e.type === 'crew_kickoff_completed');
-  return (done?.output as string) ?? (done?.result as string) ?? '';
+/** Any free-text an event may carry (crew/task/agent output, or an LLM response). */
+function eventText(e: WorkflowEvent): string {
+  return (
+    (typeof e.output === 'string' && e.output) ||
+    (typeof e.result === 'string' && e.result) ||
+    (typeof e.response === 'string' && e.response) ||
+    ''
+  );
+}
+
+/**
+ * Pull the structured result out of the run. The reporter's JSON block isn't
+ * always on `crew_kickoff_completed` — depending on the workflow it can land on
+ * the final `task_completed` / `agent_execution_completed` (or an LLM response).
+ * Scan newest-first and return the first event whose text yields a valid result.
+ */
+export function extractResultFromEvents(events: WorkflowEvent[]): AnalyticsResult | null {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const result = extractResultJson(eventText(events[i]));
+    if (result) return result;
+  }
+  return null;
 }
 
 export function isCompleted(events: WorkflowEvent[]): boolean {

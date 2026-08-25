@@ -2,12 +2,20 @@
 
 import { useState } from 'react';
 import { BarChart3, ShieldAlert, AlertTriangle, Loader2, ChevronDown, Code } from 'lucide-react';
-import { AnalyticsPanel } from '@/lib/types';
+import { AnalyticsPanel, WorkflowEvent } from '@/lib/types';
 import { DataChart } from './DataChart';
+import { ProgressGraph } from './ProgressGraph';
 
-export function ResultPanel({ panel }: { panel: AnalyticsPanel }) {
+interface ResultPanelProps {
+  panel: AnalyticsPanel;
+  workflowData?: unknown;
+  events?: WorkflowEvent[];
+}
+
+export function ResultPanel({ panel, workflowData, events }: ResultPanelProps) {
   const [showSql, setShowSql] = useState(false);
   const r = panel.result;
+  const hasLiveGraph = panel.status === 'running' && !!workflowData && !!events && events.length > 0;
 
   return (
     <div className="overflow-hidden rounded-xl border border-[#e3e6ea] bg-white shadow-[0_1px_3px_rgba(20,20,50,0.06)]">
@@ -20,7 +28,9 @@ export function ResultPanel({ panel }: { panel: AnalyticsPanel }) {
 
       {/* Body */}
       {panel.status === 'running' && (
-        <p className="px-4 py-10 text-center text-sm text-[#9aa1ac]">Running the Agent Studio workflow…</p>
+        hasLiveGraph
+          ? <ProgressGraph workflowData={workflowData} events={events!} />
+          : <p className="px-4 py-10 text-center text-sm text-[#9aa1ac]">Running the Agent Studio workflow…</p>
       )}
 
       {panel.status === 'blocked' && (

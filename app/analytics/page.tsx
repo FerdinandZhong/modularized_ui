@@ -12,7 +12,7 @@ import { useWorkflowStore } from '@/stores/workflowStore';
 import { createApiClient } from '@/lib/api';
 import { AnalyticsPanel, WorkflowEvent } from '@/lib/types';
 import {
-  extractResultJson, finalOutputText, isCompleted, isFailed, blockedEvent, blockReason,
+  extractResultFromEvents, isCompleted, isFailed, blockedEvent, blockReason,
 } from '@/lib/analytics';
 
 const POLL_MS = 1500;
@@ -41,6 +41,7 @@ export default function AnalyticsPage() {
   const [question, setQuestion] = useState('');
   const [panels, setPanels] = useState<AnalyticsPanel[]>([]);
   const [busy, setBusy] = useState(false);
+  const [live, setLive] = useState<{ id: string; events: WorkflowEvent[] } | null>(null);
   const idRef = useRef(0);
 
   const update = (id: string, patch: Partial<AnalyticsPanel>) =>
@@ -53,6 +54,7 @@ export default function AnalyticsPage() {
     setQuestion('');
     const id = `p${++idRef.current}`;
     setPanels((ps) => [{ id, question: q, status: 'running' }, ...ps]);
+    setLive({ id, events: [] });
 
     const client = createApiClient({ workflowUrl, apiKey });
     try {
@@ -61,12 +63,15 @@ export default function AnalyticsPage() {
       for (let i = 0; i < MAX_POLLS; i++) {
         await new Promise((r) => setTimeout(r, POLL_MS));
         const { events: fresh } = await client.getEvents(trace_id);
-        if (fresh?.length) events.push(...fresh);
+        if (fresh?.length) {
+          events.push(...fresh);
+          setLive({ id, events: [...events] });
+        }
         const blocked = blockedEvent(events);
         if (blocked) { update(id, { status: 'blocked', message: blockReason(blocked) }); break; }
         if (isFailed(events)) { update(id, { status: 'error', message: 'Workflow failed. See Ops / Phoenix for details.' }); break; }
         if (isCompleted(events)) {
-          const result = extractResultJson(finalOutputText(events));
+          const result = extractResultFromEvents(events);
           update(id, result ? { status: 'done', result } : { status: 'error', message: 'Finished but returned no structured result JSON.' });
           break;
         }
@@ -75,6 +80,7 @@ export default function AnalyticsPage() {
     } catch (err) {
       update(id, { status: 'error', message: err instanceof Error ? err.message : 'Request failed.' });
     } finally {
+      setLive(null);
       setBusy(false);
     }
   }
@@ -164,7 +170,14 @@ export default function AnalyticsPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                  {panels.map((p) => <ResultPanel key={p.id} panel={p} />)}
+                  {panels.map((p) => (
+                    <ResultPanel
+                      key={p.id}
+                      panel={p}
+                      workflowData={workflowData}
+                      events={live?.id === p.id ? live.events : undefined}
+                    />
+                  ))}
                 </div>
               )}
             </section>
